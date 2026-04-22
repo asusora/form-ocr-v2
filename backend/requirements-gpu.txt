@@ -1,0 +1,25 @@
+# GPU 部署用。安装步骤：
+#   pip uninstall -y paddlepaddle paddlepaddle-gpu
+#   pip install -r requirements-gpu.txt -i https://www.paddlepaddle.org.cn/packages/stable/cu126/
+# 注意：
+# - -i 源必须指向 Paddle 官方镜像，paddlepaddle-gpu 不在 PyPI 主索引里。
+# - cu126 对应 CUDA 12.x 驱动（L20 等 Ada/Hopper 卡）；CUDA 11.8 用 cu118，CUDA 12.3 用 cu123。
+# - 装完需 `export PADDLE_USE_GPU=true` 并重启服务。
+
+fastapi==0.110.0
+uvicorn[standard]==0.27.1
+pydantic==2.6.1
+pydantic-settings==2.2.1
+sqlalchemy==2.0.27
+alembic==1.13.1
+pymysql==1.1.0
+cryptography==42.0.2
+python-multipart==0.0.9
+pymupdf==1.24.14
+paddlepaddle-gpu>=3.0.0
+paddleocr==3.5.0
+opencv-python-headless==4.9.0.80
+pillow==10.2.0
+numpy==1.26.4
+rapidfuzz==3.6.1
+openpyxl==3.1.2

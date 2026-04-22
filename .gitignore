@@ -1,0 +1,16 @@
+.DS_Store
+
+# 前端依赖与构建产物
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# 后端构建产物
+backend/form_ocr_backend.egg-info/
+
+# 通用本地环境目录
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/

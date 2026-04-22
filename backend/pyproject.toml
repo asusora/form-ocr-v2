@@ -1,0 +1,57 @@
+[project]
+name = "form-ocr-backend"
+version = "0.1.0"
+description = "表单 OCR 模板化识别系统后端"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "fastapi==0.110.0",
+    "uvicorn[standard]==0.27.1",
+    "pydantic==2.6.1",
+    "pydantic-settings==2.2.1",
+    "sqlalchemy==2.0.27",
+    "alembic==1.13.1",
+    "pymysql==1.1.0",
+    "cryptography==42.0.2",
+    "python-multipart==0.0.9",
+    "pymupdf==1.24.14",
+    "paddlepaddle>=3.0.0",
+    "paddleocr==3.5.0",
+    "opencv-python-headless==4.9.0.80",
+    "pillow==10.2.0",
+    "numpy==1.26.4",
+    "rapidfuzz==3.6.1",
+    "openpyxl==3.1.2",
+]
+
+[project.optional-dependencies]
+# GPU 部署环境用：先 `pip uninstall paddlepaddle`，再
+# `pip install -e .[gpu] -i https://www.paddlepaddle.org.cn/packages/stable/cu126/`
+# （cu126 对应 CUDA 12.x 驱动，按实际 CUDA 版本换分支）
+gpu = [
+    "paddlepaddle-gpu>=3.0.0",
+]
+dev = [
+    "pytest==8.0.0",
+    "pytest-asyncio==0.23.5",
+    "httpx==0.26.0",
+    "ruff==0.2.2",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "slow: slow tests requiring model downloads or real OCR",
+]
