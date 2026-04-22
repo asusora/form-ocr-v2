@@ -1,0 +1,13 @@
+.env
+.env.local
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+tests/
+data/
+form_ocr_backend.egg-info/
+*.pyc
+*.pyo
+*.pyd

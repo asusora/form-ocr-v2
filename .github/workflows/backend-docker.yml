@@ -1,0 +1,93 @@
+name: Backend Docker Build
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-docker.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-docker.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: backend-docker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 初始化 Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 计算镜像参数
+        id: prep
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          IMAGE_REPOSITORY: ${{ vars.DOCKERHUB_REPOSITORY }}
+        run: |
+          set -eu
+          SHORT_SHA="${GITHUB_SHA::7}"
+          SHOULD_PUSH="false"
+
+          if [ "${GITHUB_EVENT_NAME}" = "push" ] \
+            && [ "${GITHUB_REF}" = "refs/heads/main" ] \
+            && [ -n "${DOCKERHUB_USERNAME}" ] \
+            && [ -n "${DOCKERHUB_TOKEN}" ] \
+            && [ -n "${IMAGE_REPOSITORY}" ]; then
+            SHOULD_PUSH="true"
+          fi
+
+          echo "short_sha=${SHORT_SHA}" >> "${GITHUB_OUTPUT}"
+          echo "should_push=${SHOULD_PUSH}" >> "${GITHUB_OUTPUT}"
+
+          if [ -n "${IMAGE_REPOSITORY}" ]; then
+            {
+              echo "tags<<EOF"
+              echo "${IMAGE_REPOSITORY}:latest"
+              echo "${IMAGE_REPOSITORY}:sha-${SHORT_SHA}"
+              echo "EOF"
+            } >> "${GITHUB_OUTPUT}"
+          else
+            {
+              echo "tags<<EOF"
+              echo "form-ocr-backend:ci-${SHORT_SHA}"
+              echo "EOF"
+            } >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: 输出推送状态
+        run: |
+          if [ "${{ steps.prep.outputs.should_push }}" = "true" ]; then
+            echo "已检测到 Docker Hub 凭据，本次构建会推送镜像。"
+          else
+            echo "未检测到完整 Docker Hub 配置，本次仅执行镜像构建校验。"
+          fi
+
+      - name: 登录 Docker Hub
+        if: steps.prep.outputs.should_push == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 构建并按条件推送后端镜像
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          platforms: linux/amd64
+          push: ${{ steps.prep.outputs.should_push == 'true' }}
+          tags: ${{ steps.prep.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
