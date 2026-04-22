@@ -4,9 +4,12 @@
 frontend/node_modules/
 frontend/dist/
 frontend/coverage/
+frontend/tests/
 
 # 后端构建产物
 backend/form_ocr_backend.egg-info/
+backend/tests/
+docs/tests/
 
 # 通用本地环境目录
 .venv/
@@ -14,3 +17,4 @@ venv/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
+docs/Untitled-1.json
